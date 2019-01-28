@@ -17,7 +17,9 @@ class WebCrawler:
         self.get_unsaved_pasted_bins()
 
     def get_unsaved_pasted_bins(self):
-        self.is_pasted_bin_exist_in_db("sfsf")
+        bins_keys = self.get_recent_pasted_bin_keys()
+        unsaved_keys = [key for key in bins_keys if not self.is_pasted_bin_exist_in_db(key)]
+        return unsaved_keys
 
     def get_recent_pasted_bin_keys(self):
         r = requests.get(self.ARCHIVE_URL)
@@ -27,6 +29,7 @@ class WebCrawler:
         pasted_bins_key_list = [bin_key['href'] for bin_key in main_table.findAll("a")]
         return pasted_bins_key_list
 
+    #TODO: I can imrove the search if I open a connection to the DB once and query all and then return the list instead of open-search-close for each key
     def is_pasted_bin_exist_in_db(self,pasted_bin_key):
         if not os.path.isfile(self.TINY_DB_PATH): # TODO: Handle the case where the folder(s) path to the file does not exist, for example "tinyDB" in this case
             file = open(self.TINY_DB_PATH, "w")
@@ -34,7 +37,7 @@ class WebCrawler:
         db = TinyDB(self.TINY_DB_PATH)
         bin_query = Query()
         fetched_bin = db.search(bin_query.key == pasted_bin_key)
-
+        db.close()
         if len(fetched_bin)==0:
             return False
         return True
