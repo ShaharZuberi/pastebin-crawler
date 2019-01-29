@@ -31,6 +31,9 @@ class WebCrawler:
 
     #TODO: I can imrove the search if I open a connection to the DB once and query all and then return the list instead of open-search-close for each key
     def is_pasted_bin_exist_in_db(self,pasted_bin_key):
+        db_dir_path=os.path.dirname(self.TINY_DB_PATH)
+        if not os.path.isdir(db_dir_path):
+            os.makedirs(db_dir_path)
         if not os.path.isfile(self.TINY_DB_PATH): # TODO: Handle the case where the folder(s) path to the file does not exist, for example "tinyDB" in this case
             file = open(self.TINY_DB_PATH, "w")
             file.close()
