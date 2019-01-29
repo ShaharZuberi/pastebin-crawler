@@ -1,6 +1,7 @@
 import requests
 import os
 import arrow
+import threading
 from bs4 import BeautifulSoup
 from tinydb import TinyDB, Query
 
@@ -29,6 +30,10 @@ class PastedBin:
     def __init__(self,site,key):
         self.site = site
         self.key = key
+        self.author = "Unknown"
+        self.title = ""
+        self.date = ""
+        self.content = ""
 
     def import_pasted_bin(self):
         r = requests.get(self.site+'/Z5h3AXD1')
@@ -39,24 +44,15 @@ class PastedBin:
         info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
 
         author = info_tag.find("a")
-        if author==None:
-            author="Unknown"
-        else:
-            author = author.text
-
-        title = title_tag.text # TODO: Normalize
+        if author!=None:
+            self.author=author.text.strip(' \t\n\r')
+        self.title = title_tag.text.strip(' \t\n\r')
         date = info_tag.find("span")['title']
-        date = arrow.get(date,'dddd Do of MMMM YYYY HH:mm:ss A')
-        content = requests.get(self.site+'/raw'+self.key)
+        self.date = arrow.get(date,'dddd Do of MMMM YYYY HH:mm:ss A')
+        self.content = requests.get(self.site+'/raw'+self.key).text.strip(' ')
 
-        self.save_pasted_bin_values(title,author,date,content,)
-
-    def save_pasted_bin_values(self,title,author,date,content):
-        author = author.strip(' \t\n\r')
-        title = title.strip(' \t\n\r')
-        content = content.text.strip(' ')
-        row = {'key': self.key, 'title': title, 'author': author, 'date': str(date), 'content': content}
-        print('key'+self.key+' saved to db')
+    def save_pasted_bin_to_db(self):
+        row = {'key': self.key, 'title': self.title, 'author': self.author, 'date': str(self.date), 'content': self.content}
         db = DB().get_handle()
         db.insert(row)
         db.close()
@@ -68,13 +64,17 @@ class WebCrawler:
     ARCHIVE_URL = SITE_URL+"/archive"
 
     def __init__(self):
+        self.recent_pasted_bins = [] #Our pasted bin data structure. a list of PastedBin objects
         return
 
     def start(self):
         unsaved_bins_keys=self.get_unsaved_pasted_bins()
         for key in unsaved_bins_keys:
-            a = PastedBin(self.SITE_URL, key)
-            a.import_pasted_bin()
+            print("Importing "+key)
+            new_bin = PastedBin(self.SITE_URL, key)
+            new_bin.import_pasted_bin()
+            new_bin.save_pasted_bin_to_db()
+            self.recent_pasted_bins.append(new_bin)
 
     def get_unsaved_pasted_bins(self):
         bins_keys = self.get_recent_pasted_bin_keys()
