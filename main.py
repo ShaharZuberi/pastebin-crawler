@@ -3,6 +3,32 @@ import os
 from bs4 import BeautifulSoup
 from tinydb import TinyDB, Query
 
+class PastedBin:
+
+
+    def __init__(self,site,key):
+        self.site = site
+        self.key = key
+
+    def load_pasted_bin(self):
+        r = requests.get(self.site+self.key)
+        # TODO: handle different status codes: 200, 404, 401, maybe try and make a class for the request that can be used in both classes
+        parsed_html = BeautifulSoup(r.text,features="html.parser")
+
+        title_tag = parsed_html.body.find("div", {"class": "paste_box_line1"})
+        info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
+
+        title = title_tag.text
+        author = info_tag.contents[2]
+        date = info_tag.contents[5]['title']
+        content = requests.get(self.site+'/raw'+self.key)
+
+        self.save_pasted_bin_values(title,author,date,content)
+
+    def save_pasted_bin_values(self,title,author,date,content):
+        # TODO: Continue from here
+        return "remove me"
+
 
 class WebCrawler:
     SAMPLE_TIME_INTERVAL = 120
@@ -14,7 +40,12 @@ class WebCrawler:
         return
 
     def start(self):
-        self.get_unsaved_pasted_bins()
+        unsaved_bins_keys=self.get_unsaved_pasted_bins()
+        a = PastedBin(self.SITE_URL,unsaved_bins_keys[0])
+        a.load_pasted_bin()
+
+    def fetch_bins(self,keys):
+        return "some value"
 
     def get_unsaved_pasted_bins(self):
         bins_keys = self.get_recent_pasted_bin_keys()
@@ -24,7 +55,7 @@ class WebCrawler:
     def get_recent_pasted_bin_keys(self):
         r = requests.get(self.ARCHIVE_URL)
         # TODO: handle different status_code: 200, 404, 401
-        parsed_html = BeautifulSoup(r.text)
+        parsed_html = BeautifulSoup(r.text,features="html.parser")
         main_table = parsed_html.body.find("table", {"class": "maintable"})
         pasted_bins_key_list = [bin_key['href'] for bin_key in main_table.findAll("a")]
         return pasted_bins_key_list
