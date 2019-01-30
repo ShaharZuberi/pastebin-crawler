@@ -8,7 +8,7 @@ class Request:
         self.response=None
         self.error=None
 
-    def parse_html(self,url):
+    def parse(self,url):
         try:
             self.response = requests.get(url)
         except:

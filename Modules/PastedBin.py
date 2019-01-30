@@ -2,6 +2,7 @@ import arrow
 from Modules.TinyDB import *
 from Modules.SiteRequest import *
 
+
 class PastedBin:
     def __init__(self,site,key):
         self.site = site
@@ -11,11 +12,12 @@ class PastedBin:
         self.date = ""
         self.content = ""
 
-    def import_pasted_bin(self):
+    def parse_paste(self):
         r = Request()
-        parsed_html = r.parse_html(self.site+self.key)
+        parsed_html = r.parse(self.site+self.key)
         if parsed_html is None:
             return False
+
         title_tag = parsed_html.body.find("div", {"class": "paste_box_line1"})
         info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
 
@@ -36,7 +38,7 @@ class PastedBin:
 
         self.content = requests.get(self.site+'/raw'+self.key).text.strip(' ')
 
-    def save_pasted_bin_to_db(self):
+    def save_paste(self):
         row = {
             'key': self.key,
             'title': self.title,
