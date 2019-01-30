@@ -1,4 +1,4 @@
-from Modules.WebCrawler import WebCrawler
+from Modules.WebCrawler import *
 
 C = WebCrawler()
 C.start()
