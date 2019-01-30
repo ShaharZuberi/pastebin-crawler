@@ -1,12 +1,10 @@
 import arrow
-from Modules.TinyDB import *
-from Modules.SiteRequest import *
+from Modules.TinyDB import DB
+from Modules.SiteRequest import Request
 
-"""
-    PasteBin uses as a single instance for a parsed paste bin
-"""
+
 class PastedBin:
-    def __init__(self,site,key):
+    def __init__(self, site, key):
         self.site = site
         self.key = key
         self.author = ""
@@ -23,22 +21,23 @@ class PastedBin:
         title_tag = parsed_html.body.find("div", {"class": "paste_box_line1"})
         info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
 
-        self.html_field_extraction(title_tag,info_tag)
+        self.html_field_extraction(title_tag, info_tag)
         return True
 
     def html_field_extraction(self, title_tag, info_tag):
         author = info_tag.find("a")
         if author is not None:
-            self.author=author.text.strip(' \t\n\r')
+            self.author = author.text.strip(' \t\n\r')
 
         title = title_tag.text.strip(' \t\n\r')
         if title != 'Untitled':
             self.title = title
 
         date = info_tag.find("span")['title']
-        self.date = arrow.get(date,'dddd Do of MMMM YYYY HH:mm:ss A')
+        self.date = arrow.get(date, 'dddd Do of MMMM YYYY HH:mm:ss A')
 
-        self.content = requests.get(self.site+'/raw'+self.key).text.strip(' ')
+        r = Request()
+        self.content = r.parse(self.site+'/raw'+self.key).text.strip(' ')
 
     def save_paste(self):
         row = {

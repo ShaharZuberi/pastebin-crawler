@@ -18,11 +18,11 @@ class DB:
 
         self.db = TinyDB(self.DB_PATH)
 
-    def search_key(self,key):
+    def search_key(self, key):
         query = Query()
         return self.db.search(query.key == key)
 
-    def insert(self,json):
+    def insert(self, json):
         self.db.insert(json)
 
     def close(self):

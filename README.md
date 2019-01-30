@@ -1,6 +1,16 @@
 # pastebin-crawler
+Pastebin.com crawler
 
+####Installations
+```bash
+?
+```
 
+####Execution
+Execute crawler by runnig the following command
+```bash
+$ python sample.py
+``` 
 
 #Discussion:
 1. What will happen if the link to the pasted bin will be changed? should we use a different uniqe key?

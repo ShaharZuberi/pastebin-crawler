@@ -1,7 +1,8 @@
 import threading
-from Modules.PastedBin import *
-from Modules.TinyDB import *
-from Modules.SiteRequest import *
+import arrow
+from Modules.PastedBin import PastedBin
+from Modules.TinyDB import DB
+from Modules.SiteRequest import Request
 
 
 class Crawler:
@@ -15,15 +16,15 @@ class Crawler:
         return
 
     def start(self):
-        threading.Timer(self.INTERVAL,self.start).start()
-        print("Begining crawling "+str(arrow.now()))
+        threading.Timer(self.INTERVAL, self.start).start()
+        print("Beginning crawling "+str(arrow.now()))
         print("IN_MEMORY_PASTES:"+str(len(self.pastes)))
 
         self.parse_and_save()
 
     def parse_and_save(self):
-        recent_keys = self.recent_pastes_keys() # All keys
-        unsaved_keys = self.filter_unsaved_keys(recent_keys) # Unsaved keys only
+        recent_keys = self.recent_pastes_keys()  # All keys
+        unsaved_keys = self.filter_unsaved_keys(recent_keys)  # Unsaved keys
 
         for key in unsaved_keys:
             print("Parsing "+key)
@@ -39,7 +40,8 @@ class Crawler:
             else:
                 print("Import of "+key+" failed. skipping it")
 
-    def filter_unsaved_keys(self,keys):
+    @staticmethod
+    def filter_unsaved_keys(keys):
         db = DB()
         unsaved_keys = [key for key in keys if not db.search_key(key)]
         db.close()
@@ -54,7 +56,8 @@ class Crawler:
             raise Exception("Unable to load url "+self.ARCHIVE_URL)
 
         main_table = parsed_html.body.find("table", {"class": "maintable"})
-        keys_list = [paste_tag['href'] for paste_tag in main_table.findAll("a") if '/archive' not in paste_tag['href']]
+        tags = main_table.findAll("a")
+        keys = [tag['href'] for tag in tags if '/archive' not in tag['href']]
 
-        print("RECENT pasted bins:" + str(len(keys_list)))
-        return keys_list
+        print("RECENT pasted bins:" + str(len(keys)))
+        return keys

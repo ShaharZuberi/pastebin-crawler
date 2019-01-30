@@ -5,15 +5,15 @@ from bs4 import BeautifulSoup
 class Request:
     def __init__(self):
         self.url = None
-        self.response=None
-        self.error=None
+        self.response = None
+        self.error = None
 
-    def parse(self,url):
+    def parse(self, url):
         try:
             self.response = requests.get(url)
-        except:
+        except Exception as e:
             print("Page loading error "+url)
-            raise
+            raise e
 
         if self.response.status_code == 401:
             print("Unauthorized error "+url)
