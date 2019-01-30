@@ -2,7 +2,9 @@ import arrow
 from Modules.TinyDB import *
 from Modules.SiteRequest import *
 
-
+"""
+    PasteBin uses as a single instance for a parsed paste bin
+"""
 class PastedBin:
     def __init__(self,site,key):
         self.site = site
@@ -46,6 +48,6 @@ class PastedBin:
             'date': str(self.date),
             'content': self.content
             }
-        db = DB().get_handle()
+        db = DB()
         db.insert(row)
         db.close()

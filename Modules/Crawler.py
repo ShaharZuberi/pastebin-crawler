@@ -2,7 +2,6 @@ import threading
 from Modules.PastedBin import *
 from Modules.TinyDB import *
 from Modules.SiteRequest import *
-from tinydb import Query #TODO: Can I move this to the TinyDB.py also?
 
 
 class Crawler:
@@ -41,9 +40,11 @@ class Crawler:
                 print("Import of "+key+" failed. skipping it")
 
     def filter_unsaved_keys(self,keys):
-        unsaved_keys = [key for key in keys if not self.paste_in_db(key)]
-        print("UNSAVED pasted bins:" + str(len(unsaved_keys)))
+        db = DB()
+        unsaved_keys = [key for key in keys if not db.search_key(key)]
+        db.close()
 
+        print("UNSAVED pasted bins:" + str(len(unsaved_keys)))
         return unsaved_keys
 
     def recent_pastes_keys(self):
@@ -57,14 +58,3 @@ class Crawler:
 
         print("RECENT pasted bins:" + str(len(keys_list)))
         return keys_list
-
-    #TODO: I can imrove the search if I open a connection to the DB once and query all and then return the list instead of open-search-close for each key
-    def paste_in_db(self,pasted_bin_key):
-        db = DB().get_handle()
-        bin_query = Query()
-        fetched_bin = db.search(bin_query.key == pasted_bin_key)
-        db.close()
-
-        if len(fetched_bin) == 0:
-            return False
-        return True
