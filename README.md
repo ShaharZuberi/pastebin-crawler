@@ -2,7 +2,7 @@
 Welcome to Pastebin.com crawler
 
 #### Automatic execution
-Run the docker image.
+Run the docker image. (https://we.tl/t-VItHF76n8z)
 
 #### Manual python execution
 ##### Installation
