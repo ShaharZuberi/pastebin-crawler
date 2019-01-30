@@ -30,13 +30,13 @@ class PastedBin:
     def __init__(self,site,key):
         self.site = site
         self.key = key
-        self.author = "Unknown"
+        self.author = ""
         self.title = ""
         self.date = ""
         self.content = ""
 
     def import_pasted_bin(self):
-        r = requests.get(self.site+'/Z5h3AXD1')
+        r = requests.get(self.site+self.key)
         # TODO: handle different status codes: 200, 404, 401, maybe try and make a class for the request that can be used in both classes
         parsed_html = BeautifulSoup(r.text,features="html.parser")
 
@@ -44,9 +44,11 @@ class PastedBin:
         info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
 
         author = info_tag.find("a")
-        if author!=None:
+        if author is not None:
             self.author=author.text.strip(' \t\n\r')
-        self.title = title_tag.text.strip(' \t\n\r')
+        title = title_tag.text.strip(' \t\n\r')
+        if title != 'Untitled':
+            self.title = title
         date = info_tag.find("span")['title']
         self.date = arrow.get(date,'dddd Do of MMMM YYYY HH:mm:ss A')
         self.content = requests.get(self.site+'/raw'+self.key).text.strip(' ')
