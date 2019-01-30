@@ -59,21 +59,28 @@ class PastedBin:
 
 
 class WebCrawler:
-    SAMPLE_TIME_INTERVAL = 120
+    TIME_INTERVAL = 120
     SITE_URL = "https://pastebin.com"
     ARCHIVE_URL = SITE_URL+"/archive"
+    MAX_IN_MEMORY_PASTES_SAVED = 200
 
     def __init__(self):
         self.recent_pasted_bins = [] #Our pasted bin data structure. a list of PastedBin objects
         return
 
     def start(self):
+        threading.Timer(self.TIME_INTERVAL,self.start).start()
+        print("Begining crawling "+str(arrow.now()))
+        print("IN_MEMORY_PASTES:"+str(len(self.recent_pasted_bins)))
+
         unsaved_bins_keys=self.get_unsaved_pasted_bins()
         for key in unsaved_bins_keys:
             print("Importing "+key)
             new_bin = PastedBin(self.SITE_URL, key)
             new_bin.import_pasted_bin()
             new_bin.save_pasted_bin_to_db()
+            if (len(self.recent_pasted_bins)>self.MAX_IN_MEMORY_PASTES_SAVED):
+                del self.recent_pasted_bins[0]
             self.recent_pasted_bins.append(new_bin)
 
     def get_unsaved_pasted_bins(self):
