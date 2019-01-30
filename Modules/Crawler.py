@@ -17,7 +17,7 @@ class Crawler:
 
     def start(self):
         threading.Timer(self.INTERVAL, self.start).start()
-        print("Beginning crawling "+str(arrow.now()))
+        print("Begin crawling "+str(arrow.now()))
         print("IN_MEMORY_PASTES:"+str(len(self.pastes)))
 
         self.parse_and_save()

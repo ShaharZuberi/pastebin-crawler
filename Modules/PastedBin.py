@@ -21,8 +21,8 @@ class PastedBin:
         title_tag = parsed_html.body.find("div", {"class": "paste_box_line1"})
         info_tag = parsed_html.body.find("div", {"class": "paste_box_line2"})
 
-        self.html_field_extraction(title_tag, info_tag)
-        return True
+        success = self.html_field_extraction(title_tag, info_tag)
+        return success
 
     def html_field_extraction(self, title_tag, info_tag):
         author = info_tag.find("a")
@@ -38,6 +38,9 @@ class PastedBin:
 
         r = Request()
         self.content = r.parse(self.site+'/raw'+self.key).text.strip(' ')
+        if self.content is None:
+            return False
+        return True
 
     def save_paste(self):
         row = {
